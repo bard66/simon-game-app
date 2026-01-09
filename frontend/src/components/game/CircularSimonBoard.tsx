@@ -42,16 +42,16 @@ interface WedgeProps {
 
 const ColorWedge: React.FC<WedgeProps> = ({ color, isActive, onClick, disabled, position }) => {
   const colors = {
-    red: { base: '#ef4444', light: '#fca5a5', shadow: '#dc2626' },
-    blue: { base: '#3b82f6', light: '#93c5fd', shadow: '#2563eb' },
-    yellow: { base: '#facc15', light: '#fef08a', shadow: '#eab308' },
-    green: { base: '#22c55e', light: '#86efac', shadow: '#16a34a' },
+    red: { base: '#ff4757', light: '#ff6b81', shadow: '#ee5a6f' },
+    blue: { base: '#3742fa', light: '#5f59ff', shadow: '#2f3cdc' },
+    yellow: { base: '#ffd700', light: '#ffe44d', shadow: '#e6c200' },
+    green: { base: '#20bf6b', light: '#4cd787', shadow: '#1aa158' },
   };
 
   const wedgeColor = colors[color];
   const bgColor = isActive ? wedgeColor.light : wedgeColor.base;
 
-  // Position-specific border radius
+  // Position-specific border radius for perfect quarter circles
   const borderRadius = {
     'top-left': '100% 0 0 0',
     'top-right': '0 100% 0 0',
@@ -64,21 +64,23 @@ const ColorWedge: React.FC<WedgeProps> = ({ color, isActive, onClick, disabled, 
       onClick={onClick}
       disabled={disabled}
       className={`
-        absolute w-1/2 h-1/2
+        absolute
         transition-all duration-200
-        ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer active:scale-95'}
+        ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
         ${position === 'top-left' ? 'top-0 left-0' : ''}
         ${position === 'top-right' ? 'top-0 right-0' : ''}
         ${position === 'bottom-left' ? 'bottom-0 left-0' : ''}
         ${position === 'bottom-right' ? 'bottom-0 right-0' : ''}
       `}
       style={{
+        width: 'calc(50% - 3px)',
+        height: 'calc(50% - 3px)',
         backgroundColor: bgColor,
         borderRadius,
         touchAction: 'manipulation',
-        transform: isActive ? 'scale(1.05)' : 'scale(1)',
-        filter: isActive ? 'brightness(1.4) drop-shadow(0 0 20px currentColor)' : 'brightness(1)',
-        boxShadow: isActive ? `0 0 30px ${wedgeColor.light}` : 'none',
+        transform: isActive ? 'scale(1.02)' : 'scale(1)',
+        filter: isActive ? 'brightness(1.5) saturate(1.2)' : 'brightness(1)',
+        boxShadow: isActive ? `0 0 40px ${wedgeColor.light}, inset 0 0 20px rgba(255,255,255,0.3)` : 'none',
       }}
       aria-label={`${color} button`}
     >
@@ -217,69 +219,71 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
       )}
 
       {/* Circular Simon Board */}
-      <div className="relative w-full max-w-[320px] aspect-square">
-        {/* The 4 colored wedges */}
-        <div className="relative w-full h-full rounded-full overflow-hidden bg-gray-900 shadow-2xl">
-          {/* Green - Top Left */}
-          <ColorWedge
-            color="green"
-            isActive={activeColor === 'green'}
-            onClick={() => handleColorClick('green')}
-            disabled={disabled || isShowingSequence}
-            position="top-left"
-          />
-          
-          {/* Red - Top Right */}
-          <ColorWedge
-            color="red"
-            isActive={activeColor === 'red'}
-            onClick={() => handleColorClick('red')}
-            disabled={disabled || isShowingSequence}
-            position="top-right"
-          />
-          
-          {/* Yellow - Bottom Left */}
-          <ColorWedge
-            color="yellow"
-            isActive={activeColor === 'yellow'}
-            onClick={() => handleColorClick('yellow')}
-            disabled={disabled || isShowingSequence}
-            position="bottom-left"
-          />
-          
-          {/* Blue - Bottom Right */}
-          <ColorWedge
-            color="blue"
-            isActive={activeColor === 'blue'}
-            onClick={() => handleColorClick('blue')}
-            disabled={disabled || isShowingSequence}
-            position="bottom-right"
-          />
+      <div className="relative w-full max-w-[min(85vw,360px)] mx-auto">
+        <div className="relative w-full pb-[100%]">
+          {/* The 4 colored wedges */}
+          <div className="absolute inset-0 rounded-full overflow-hidden bg-black shadow-2xl">
+            {/* Green - Top Left */}
+            <ColorWedge
+              color="green"
+              isActive={activeColor === 'green'}
+              onClick={() => handleColorClick('green')}
+              disabled={disabled || isShowingSequence}
+              position="top-left"
+            />
+            
+            {/* Red - Top Right */}
+            <ColorWedge
+              color="red"
+              isActive={activeColor === 'red'}
+              onClick={() => handleColorClick('red')}
+              disabled={disabled || isShowingSequence}
+              position="top-right"
+            />
+            
+            {/* Yellow - Bottom Left */}
+            <ColorWedge
+              color="yellow"
+              isActive={activeColor === 'yellow'}
+              onClick={() => handleColorClick('yellow')}
+              disabled={disabled || isShowingSequence}
+              position="bottom-left"
+            />
+            
+            {/* Blue - Bottom Right */}
+            <ColorWedge
+              color="blue"
+              isActive={activeColor === 'blue'}
+              onClick={() => handleColorClick('blue')}
+              disabled={disabled || isShowingSequence}
+              position="bottom-right"
+            />
 
-          {/* Center Hub */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                          w-1/3 h-1/3 rounded-full bg-gray-900 border-4 border-gray-800
-                          flex items-center justify-center shadow-inner">
-            <div className="text-center">
-              <div className="text-white font-bold text-xs sm:text-sm tracking-wider">
-                SIMON
+            {/* Center Hub */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                            w-[28%] h-[28%] rounded-full bg-black border-[3px] border-gray-800
+                            flex items-center justify-center shadow-2xl z-10">
+              <div className="text-center">
+                <div className="text-white font-bold text-[10px] sm:text-xs tracking-widest">
+                  SIMON
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Black gaps between wedges (cross pattern) */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Vertical line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gray-900 transform -translate-x-1/2"></div>
-          {/* Horizontal line */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-900 transform -translate-y-1/2"></div>
+            {/* Black gaps between wedges (cross pattern) */}
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Vertical line */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-[6px] bg-black transform -translate-x-1/2"></div>
+              {/* Horizontal line */}
+              <div className="absolute top-1/2 left-0 right-0 h-[6px] bg-black transform -translate-y-1/2"></div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Player Sequence Display */}
       {isInputPhase && playerSequence.length > 0 && (
-        <div className="bg-gray-700 rounded-lg p-2 w-full max-w-[320px]">
+        <div className="bg-gray-700 rounded-lg p-2 w-full max-w-[min(85vw,360px)]">
           <div className="flex justify-center items-center gap-1 min-h-[28px]">
             {playerSequence.map((color, i) => (
               <span key={i} className="text-xl sm:text-2xl">
@@ -305,7 +309,7 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
           disabled={!canSubmit}
           style={{ touchAction: 'manipulation' }}
           className={`
-            w-full max-w-[320px] px-6 py-3 rounded-lg font-bold text-base
+            w-full max-w-[min(85vw,360px)] px-6 py-3 rounded-lg font-bold text-base
             min-h-[56px]
             transition-all duration-75
             ${canSubmit 

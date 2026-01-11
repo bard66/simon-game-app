@@ -13,6 +13,7 @@
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
     "build": "tsc && tsc-alias",
+    "render-build": "npm ci && npm run build",
     "build:backend": "tsc -p tsconfig.backend.json",
     "dev": "concurrently --names \"backend,frontend\" --prefix-colors \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "tsx watch src/backend/server.ts",

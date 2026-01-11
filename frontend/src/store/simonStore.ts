@@ -23,7 +23,7 @@ interface SimonStore {
   // Input phase state
   isInputPhase: boolean;
   playerSequence: Color[];
-  canSubmit: boolean;
+  currentInputIndex: number;  // Track position in sequence for per-color validation
   
   // Timer state (Step 3)
   timeoutAt: number | null;
@@ -61,8 +61,7 @@ interface SimonStore {
   initializeListeners: () => void;
   cleanup: () => void;
   resetGame: () => void;
-  addColorToSequence: (color: Color) => void;
-  submitSequence: (gameCode: string, playerId: string) => void;
+  addColorToSequence: (color: Color, gameCode: string, playerId: string) => void;
   clearPlayerSequence: () => void;
   startTimer: (timeoutAt: number, timeoutSeconds: number) => void;
   stopTimer: () => void;
@@ -84,7 +83,7 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
   currentRound: 1,
   isInputPhase: false,
   playerSequence: [],
-  canSubmit: false,
+  currentInputIndex: 0,
   timeoutAt: null,
   timeoutSeconds: 0,
   secondsRemaining: 0,
@@ -167,7 +166,7 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
       set({
         isInputPhase: true,
         playerSequence: [],
-        canSubmit: false,
+        currentInputIndex: 0,
         lastResult: null,
         message: 'Your turn! Click the colors in order',
       });
@@ -347,7 +346,7 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
       currentRound: 1,
       isInputPhase: false,
       playerSequence: [],
-      canSubmit: false,
+      currentInputIndex: 0,
       timeoutAt: null,
       timeoutSeconds: 0,
       secondsRemaining: 0,
@@ -378,7 +377,7 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
       currentRound: 1,
       isInputPhase: false,
       playerSequence: [],
-      canSubmit: false,
+      currentInputIndex: 0,
       lastResult: null,
       message: 'Waiting for game to start...',
       isGameActive: false,
@@ -386,33 +385,10 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
   },
   
   /**
-   * Add a color to the player's sequence
+   * Add a color to the player's sequence - validates each input immediately
    */
-  addColorToSequence: (color: Color) => {
-    set((state) => {
-      const newPlayerSequence = [...state.playerSequence, color];
-      const canSubmit = newPlayerSequence.length === state.currentSequence.length;
-      
-      return {
-        playerSequence: newPlayerSequence,
-        canSubmit,
-        message: canSubmit 
-          ? '✅ Sequence complete! Click Submit'
-          : `${newPlayerSequence.length} of ${state.currentSequence.length} colors`,
-      };
-    });
-  },
-  
-  /**
-   * Submit the player's sequence to the server
-   */
-  submitSequence: (gameCode: string, playerId: string) => {
+  addColorToSequence: (color: Color, gameCode: string, playerId: string) => {
     const state = useSimonStore.getState();
-    
-    if (!state.canSubmit) {
-      console.warn('Cannot submit - sequence incomplete');
-      return;
-    }
     
     const socket = socketService.getSocket();
     if (!socket) {
@@ -420,18 +396,46 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
       return;
     }
     
-    console.log('📤 Submitting sequence:', state.playerSequence);
+    const inputIndex = state.currentInputIndex;
+    const expectedColor = state.currentSequence[inputIndex];
+    const isCorrect = color === expectedColor;
     
-    socket.emit('simon:submit_sequence', {
+    console.log(`🎮 Input ${inputIndex}: ${color} (expected: ${expectedColor}) - ${isCorrect ? '✅' : '❌'}`);
+    
+    // Emit the input to backend for validation
+    socket.emit('simon:submit_input', {
       gameCode,
       playerId,
-      sequence: state.playerSequence,
+      color,
+      inputIndex,
     });
     
-    set({
-      message: 'Checking your answer...',
-      isInputPhase: false,
-    });
+    // Update local state
+    const newPlayerSequence = [...state.playerSequence, color];
+    const isComplete = newPlayerSequence.length === state.currentSequence.length;
+    
+    if (!isCorrect) {
+      // Wrong color - player will be eliminated by backend
+      set({
+        playerSequence: newPlayerSequence,
+        message: '❌ Wrong color! You\'re out!',
+        isInputPhase: false,
+      });
+    } else if (isComplete) {
+      // Sequence complete and correct!
+      set({
+        playerSequence: newPlayerSequence,
+        currentInputIndex: inputIndex + 1,
+        message: '✅ Correct! Waiting for other players...',
+      });
+    } else {
+      // Correct, continue
+      set({
+        playerSequence: newPlayerSequence,
+        currentInputIndex: inputIndex + 1,
+        message: `${newPlayerSequence.length} of ${state.currentSequence.length} colors`,
+      });
+    }
   },
   
   /**
@@ -440,7 +444,7 @@ export const useSimonStore = create<SimonStore>((set, get) => ({
   clearPlayerSequence: () => {
     set({
       playerSequence: [],
-      canSubmit: false,
+      currentInputIndex: 0,
     });
   },
   

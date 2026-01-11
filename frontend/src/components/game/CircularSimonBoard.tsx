@@ -19,10 +19,8 @@ interface CircularSimonBoardProps {
   isShowingSequence: boolean;
   isInputPhase: boolean;
   playerSequence: Color[];
-  canSubmit: boolean;
   lastResult: { isCorrect: boolean; playerName: string } | null;
   onColorClick: (color: Color) => void;
-  onSubmit: () => void;
   disabled?: boolean;
   secondsRemaining: number;
   timerColor: 'green' | 'yellow' | 'red';
@@ -156,9 +154,7 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
   isShowingSequence,
   isInputPhase,
   playerSequence,
-  canSubmit,
   onColorClick,
-  onSubmit,
   disabled = false,
   secondsRemaining,
   timerColor,
@@ -460,50 +456,34 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
               fontFamily="Arial, sans-serif"
               letterSpacing="2"
             >
-              SIMON
+              BAR
             </text>
           )}
         </svg>
       </div>
 
       {/* Player Sequence Display */}
-      {isInputPhase && playerSequence.length > 0 && (
+      {isInputPhase && (
         <div className="bg-gray-700/80 rounded-lg p-2 w-full max-w-[min(85vw,320px)]">
           <div className="flex justify-center items-center gap-1 min-h-[28px]">
-            {playerSequence.map((color, i) => (
-              <span key={i} className="text-xl">
-                {getColorEmoji(color)}
+            {playerSequence.length > 0 ? (
+              <>
+                {playerSequence.map((color, i) => (
+                  <span key={i} className="text-xl">
+                    {getColorEmoji(color)}
+                  </span>
+                ))}
+                <span className="text-gray-400 text-xs ml-2">
+                  {playerSequence.length}/{sequence.length}
+                </span>
+              </>
+            ) : (
+              <span className="text-gray-400 text-sm">
+                Tap the colors in order...
               </span>
-            ))}
-            <span className="text-gray-400 text-xs ml-2">
-              {playerSequence.length}/{sequence.length}
-            </span>
+            )}
           </div>
         </div>
-      )}
-
-      {/* Submit Button */}
-      {isInputPhase && (
-        <button
-          onClick={() => {
-            if (canSubmit && 'vibrate' in navigator) {
-              navigator.vibrate(100);
-            }
-            onSubmit();
-          }}
-          disabled={!canSubmit}
-          style={{ touchAction: 'manipulation' }}
-          className={`
-            w-full max-w-[min(85vw,320px)] px-6 py-3 rounded-xl font-bold text-base
-            min-h-[56px]
-            transition-all duration-100
-            ${canSubmit 
-              ? 'bg-green-500 hover:bg-green-600 active:bg-green-700 text-white cursor-pointer shadow-lg active:scale-95' 
-              : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'}
-          `}
-        >
-          {canSubmit ? '✅ SUBMIT' : `⏳ ${playerSequence.length}/${sequence.length}`}
-        </button>
       )}
     </div>
   );

@@ -243,8 +243,8 @@ export function WaitingRoomPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join my Simon Game!',
-          text: `Join me in Simon Says! Use code: ${gameCode}`,
+          title: 'Join my Bar Says Game!',
+          text: `Join me in Bar Says! Use code: ${gameCode}`,
           url: inviteUrl,
         });
         setToast({ message: 'Invite shared!', type: 'success' });

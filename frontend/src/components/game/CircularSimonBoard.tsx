@@ -8,6 +8,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Color } from '../../shared/types';
 import { soundService } from '../../services/soundService';
+import { CircularTimer } from '../ui/CircularTimer';
 
 // =============================================================================
 // TYPES
@@ -334,20 +335,20 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
   };
 
   return (
-    <div className="game-area flex flex-col items-center gap-3 w-full">
+    <div className="game-area flex flex-col items-center gap-4 w-full">
       {/* Round Display */}
       <div className="text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">
+        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
           Round {round}
         </h2>
         {isShowingSequence ? (
-          <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg px-4 py-2 animate-pulse">
-            <p className="text-yellow-400 font-bold text-base">
+          <div className="bg-surface-warning border border-simon-yellow/40 rounded-xl px-5 py-3 animate-pulse">
+            <p className="text-simon-yellow font-bold text-base">
               👀 MEMORIZE THE PATTERN!
             </p>
           </div>
         ) : (
-          <p className="text-xs sm:text-sm text-gray-300">
+          <p className="text-sm text-text-secondary">
             {disabled 
               ? '👻 Spectating...' 
               : isInputPhase
@@ -357,23 +358,16 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
         )}
       </div>
 
-      {/* Timer Display */}
+      {/* Circular Timer Display */}
       {isInputPhase && secondsRemaining > 0 && (
-        <div className="flex flex-col items-center">
-          <div 
-            className={`
-              font-bold transition-all duration-200
-              ${secondsRemaining > 10 ? 'text-3xl' : ''}
-              ${secondsRemaining > 5 && secondsRemaining <= 10 ? 'text-4xl' : ''}
-              ${secondsRemaining <= 5 ? 'text-5xl' : ''}
-              ${timerColor === 'green' ? 'text-green-400' : ''}
-              ${timerColor === 'yellow' ? 'text-yellow-400' : ''}
-              ${timerColor === 'red' ? 'text-red-400' : ''}
-              ${isTimerPulsing ? 'animate-pulse' : ''}
-            `}
-          >
-            {secondsRemaining}s
-          </div>
+        <div className="flex justify-center">
+          <CircularTimer
+            secondsRemaining={secondsRemaining}
+            totalSeconds={20} // Match your game's input time
+            timerColor={timerColor}
+            isPulsing={isTimerPulsing}
+            size="md"
+          />
         </div>
       )}
 
@@ -464,21 +458,25 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
 
       {/* Player Sequence Display */}
       {isInputPhase && (
-        <div className="bg-gray-700/80 rounded-lg p-2 w-full max-w-[min(85vw,320px)]">
-          <div className="flex justify-center items-center gap-1 min-h-[28px]">
+        <div className="bg-bg-elevated border border-border-subtle rounded-xl p-3 w-full max-w-[min(85vw,320px)]">
+          <div className="flex justify-center items-center gap-1.5 min-h-[32px]">
             {playerSequence.length > 0 ? (
               <>
                 {playerSequence.map((color, i) => (
-                  <span key={i} className="text-xl">
+                  <span 
+                    key={i} 
+                    className="text-xl animate-scale-in"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
                     {getColorEmoji(color)}
                   </span>
                 ))}
-                <span className="text-gray-400 text-xs ml-2">
+                <span className="text-text-muted text-sm ml-3 font-mono">
                   {playerSequence.length}/{sequence.length}
                 </span>
               </>
             ) : (
-              <span className="text-gray-400 text-sm">
+              <span className="text-text-muted text-sm">
                 Tap the colors in order...
               </span>
             )}

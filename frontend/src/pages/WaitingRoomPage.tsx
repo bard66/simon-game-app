@@ -4,6 +4,8 @@
  * Combined page that shows:
  * - Waiting room before game starts
  * - Simon game board during gameplay
+ * 
+ * Design: Unified dark theme with Simon color accents
  */
 
 import { useEffect, useState, useRef } from 'react';
@@ -279,15 +281,18 @@ export function WaitingRoomPage() {
   // Render game board if active
   if (roomStatus === 'active' && isGameActive) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-2 sm:p-4">
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center p-2 sm:p-4 relative overflow-hidden">
+        {/* Subtle ambient glow */}
+        <div className="ambient-glow glow-blue w-[600px] h-[600px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5" />
+        
         {/* Mute Button */}
         <MuteButton />
         
-        <div className="flex flex-col items-center w-full max-w-md">
-          {/* Step 4: Scoreboard */}
+        <div className="flex flex-col items-center w-full max-w-md relative z-10">
+          {/* Scoreboard */}
           {isGameActive && Object.keys(scores).length > 0 && (
-            <div className="bg-gray-800 rounded-xl sm:rounded-2xl p-2 sm:p-3 mb-3 w-full">
-              <div className="space-y-1">
+            <div className="glass-card p-3 mb-4 w-full">
+              <div className="space-y-1.5">
                 {players.map((player) => {
                   const score = scores[player.id] || 0;
                   const hasSubmitted = submittedPlayers.includes(player.id);
@@ -296,20 +301,25 @@ export function WaitingRoomPage() {
                   return (
                     <div
                       key={player.id}
-                      className={`flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 rounded ${
-                        isCurrentPlayer ? 'bg-blue-600' : 'bg-gray-700'
-                      }`}
+                      className={`
+                        flex items-center justify-between px-3 py-2 rounded-lg
+                        transition-all duration-fast
+                        ${isCurrentPlayer 
+                          ? 'bg-surface-info border border-simon-blue/30' 
+                          : 'bg-bg-elevated'
+                        }
+                      `}
                     >
-                      <span className="text-white text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
-                        <span>{player.avatar}</span>
-                        <span>{player.displayName}</span>
+                      <span className="text-text-primary text-sm flex items-center gap-2">
+                        <span>{player.avatar || '😀'}</span>
+                        <span className="font-medium">{player.displayName}</span>
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-white text-xs sm:text-sm font-bold">
-                          {score} pts
+                        <span className="text-text-primary text-sm font-bold">
+                          {score} <span className="text-text-muted font-normal">pts</span>
                         </span>
                         {hasSubmitted && isInputPhase && (
-                          <span className="text-green-400 text-xs">✓</span>
+                          <span className="text-simon-green text-sm">✓</span>
                         )}
                       </div>
                     </div>
@@ -319,13 +329,16 @@ export function WaitingRoomPage() {
             </div>
           )}
           
-          {/* Step 4: Eliminated Message */}
+          {/* Eliminated Message */}
           {isEliminated && (
-            <div className="bg-red-500/20 border-2 border-red-500 rounded-xl sm:rounded-2xl p-3 mb-3 text-center w-full">
-              <div className="text-3xl mb-1">💀</div>
-              <div className="text-white text-base sm:text-lg font-bold">
+            <div className="bg-surface-error border border-simon-red/40 rounded-2xl p-4 mb-4 text-center w-full animate-scale-in">
+              <div className="text-4xl mb-2">💀</div>
+              <div className="text-simon-red text-lg font-bold">
                 Eliminated!
               </div>
+              <p className="text-text-muted text-sm mt-1">
+                Watch the remaining players
+              </p>
             </div>
           )}
           
@@ -348,18 +361,26 @@ export function WaitingRoomPage() {
           />
           
           {/* Message Display */}
-          <div className="mt-6 text-center">
-            <p className="text-white text-lg font-medium">{message}</p>
-          </div>
+          {message && (
+            <div className="mt-6 text-center">
+              <p className="text-text-secondary text-lg">{message}</p>
+            </div>
+          )}
           
-          {/* Players Status */}
-          <div className="mt-8 bg-white/10 backdrop-blur rounded-2xl p-4">
-            <h3 className="text-white font-bold mb-2">Players</h3>
-            <div className="grid grid-cols-2 gap-2">
+          {/* Players Status (compact) */}
+          <div className="mt-6 glass-card p-3 w-full">
+            <div className="flex flex-wrap gap-2 justify-center">
               {players.map(player => (
-                <div key={player.id} className="text-white/80 text-sm">
-                  {player.displayName} {player.isHost && '👑'}
-                </div>
+                <span 
+                  key={player.id} 
+                  className={`
+                    text-sm px-2 py-1 rounded-lg
+                    ${player.id === playerId ? 'text-simon-blue' : 'text-text-muted'}
+                  `}
+                >
+                  {player.avatar || '😀'} {player.displayName}
+                  {player.isHost && ' 👑'}
+                </span>
               ))}
             </div>
           </div>
@@ -371,10 +392,38 @@ export function WaitingRoomPage() {
   // Render countdown
   if (roomStatus === 'countdown' && countdownValue !== null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-6xl sm:text-7xl md:text-9xl font-bold text-white mb-4">{countdownValue}</h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-white/80">Get ready!</p>
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Pulsing glow based on countdown */}
+        <div 
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{
+            background: `radial-gradient(circle at center, ${
+              countdownValue > 2 ? 'var(--simon-green)' : 
+              countdownValue > 1 ? 'var(--simon-yellow)' : 'var(--simon-red)'
+            } 0%, transparent 70%)`,
+            opacity: 0.15,
+          }}
+        />
+        
+        <div className="text-center relative z-10 animate-scale-in">
+          <h1 
+            className={`
+              text-8xl sm:text-9xl font-bold mb-4 transition-all duration-300
+              ${countdownValue > 2 ? 'text-simon-green' : ''}
+              ${countdownValue === 2 ? 'text-simon-yellow' : ''}
+              ${countdownValue <= 1 ? 'text-simon-red' : ''}
+            `}
+            style={{
+              textShadow: countdownValue > 2 
+                ? '0 0 60px var(--simon-green)' 
+                : countdownValue === 2 
+                  ? '0 0 60px var(--simon-yellow)' 
+                  : '0 0 60px var(--simon-red)',
+            }}
+          >
+            {countdownValue}
+          </h1>
+          <p className="text-xl sm:text-2xl text-text-secondary">Get ready!</p>
         </div>
       </div>
     );
@@ -382,7 +431,11 @@ export function WaitingRoomPage() {
   
   // Render waiting room
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-3 sm:p-4">
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ambient glow effects */}
+      <div className="ambient-glow glow-green w-[400px] h-[400px] -top-48 -left-48 animate-glow-pulse" />
+      <div className="ambient-glow glow-blue w-[400px] h-[400px] -bottom-48 -right-48 animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
+      
       {/* Toast notification */}
       {toast && (
         <Toast
@@ -392,39 +445,43 @@ export function WaitingRoomPage() {
         />
       )}
       
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-md sm:max-w-xl md:max-w-2xl w-full">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2">Waiting Room</h1>
+      <div className="glass-card p-6 sm:p-8 max-w-md w-full relative z-10 animate-fade-slide-up">
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary text-center mb-6">
+          Waiting Room
+        </h1>
         
-        {/* Game Code Display with Share Buttons */}
-        <div className="mb-6 sm:mb-8">
-          <p className="text-center text-gray-600 mb-3 text-sm sm:text-base">
-            Game Code: <span className="font-mono font-bold text-xl sm:text-2xl text-purple-600">{gameCode}</span>
-          </p>
+        {/* Game Code Display */}
+        <div className="mb-6">
+          <div className="text-center py-5 bg-bg-elevated rounded-2xl border border-border-subtle mb-4">
+            <p className="text-text-muted text-xs uppercase tracking-wider mb-2">
+              Game Code
+            </p>
+            <p className="font-mono text-3xl sm:text-4xl font-bold text-text-primary tracking-[0.25em]">
+              {gameCode}
+            </p>
+          </div>
           
           {/* Invite Buttons */}
-          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+          <div className="flex gap-2 justify-center">
             <button
               onClick={copyGameCode}
-              className="bg-gray-100 hover:bg-gray-200 active:bg-gray-300 active:scale-95 text-gray-700 font-medium py-2.5 sm:py-2 px-4 rounded-lg transition-all duration-75 flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px]"
-              style={{ touchAction: 'manipulation' }}
+              className="btn btn-ghost flex-1 text-sm h-11 min-h-0 px-3"
               title="Copy game code"
             >
-              📋 <span className="hidden sm:inline">Copy Code</span><span className="sm:hidden">Code</span>
+              📋 Code
             </button>
             
             <button
               onClick={copyInviteLink}
-              className="bg-blue-100 hover:bg-blue-200 active:bg-blue-300 active:scale-95 text-blue-700 font-medium py-2.5 sm:py-2 px-4 rounded-lg transition-all duration-75 flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px]"
-              style={{ touchAction: 'manipulation' }}
+              className="btn btn-ghost flex-1 text-sm h-11 min-h-0 px-3 text-simon-blue"
               title="Copy invite link"
             >
-              🔗 <span className="hidden sm:inline">Copy Link</span><span className="sm:hidden">Link</span>
+              🔗 Link
             </button>
             
             <button
               onClick={shareGame}
-              className="bg-green-100 hover:bg-green-200 active:bg-green-300 active:scale-95 text-green-700 font-medium py-2.5 sm:py-2 px-4 rounded-lg transition-all duration-75 flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px]"
-              style={{ touchAction: 'manipulation' }}
+              className="btn btn-ghost flex-1 text-sm h-11 min-h-0 px-3 text-simon-green"
               title="Share with friends"
             >
               📤 Share
@@ -433,19 +490,33 @@ export function WaitingRoomPage() {
         </div>
         
         {/* Players List */}
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Players ({players.length})</h2>
-          <div className="space-y-2">
+        <div className="mb-6">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+            Players ({players.length})
+          </h2>
+          <div className="space-y-2 animate-stagger">
             {players.map(player => (
               <div 
                 key={player.id} 
-                className="bg-gray-100 rounded-lg p-3 flex items-center justify-between"
+                className={`
+                  rounded-xl p-3 flex items-center justify-between
+                  transition-all duration-fast
+                  ${player.id === playerId 
+                    ? 'bg-surface-info border border-simon-blue/30' 
+                    : 'bg-bg-elevated border border-border-subtle'
+                  }
+                `}
               >
-                <span className="font-medium">
-                  {player.displayName}
-                  {player.id === playerId && ' (You)'}
+                <span className="font-medium text-text-primary flex items-center gap-2">
+                  <span className="text-xl">{player.avatar || '😀'}</span>
+                  <span>{player.displayName}</span>
+                  {player.id === playerId && (
+                    <span className="text-xs text-simon-blue">(You)</span>
+                  )}
                 </span>
-                {player.isHost && <span className="text-yellow-500">👑 Host</span>}
+                {player.isHost && (
+                  <span className="text-simon-yellow text-sm">👑 Host</span>
+                )}
               </div>
             ))}
           </div>
@@ -455,14 +526,13 @@ export function WaitingRoomPage() {
         {(isHost || players.length === 1) && (
           <>
             {players.length === 1 && (
-              <p className="text-center text-sm text-gray-500 mb-2">
+              <p className="text-center text-sm text-text-muted mb-3">
                 💡 You can start solo or wait for others to join
               </p>
             )}
             <button
               onClick={handleStartGame}
-              className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 active:scale-98 text-white font-bold py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl transition-all duration-75 text-base sm:text-lg min-h-[56px]"
-              style={{ touchAction: 'manipulation' }}
+              className="btn btn-primary w-full text-lg"
             >
               🎮 {players.length === 1 ? 'Start Solo Game' : 'Start Game'}
             </button>
@@ -470,9 +540,12 @@ export function WaitingRoomPage() {
         )}
         
         {!isHost && players.length > 1 && (
-          <p className="text-center text-gray-500 text-sm sm:text-base">
-            Waiting for host to start the game...
-          </p>
+          <div className="text-center py-4">
+            <div className="inline-flex items-center gap-2 text-text-muted">
+              <span className="animate-pulse">⏳</span>
+              <span>Waiting for host to start...</span>
+            </div>
+          </div>
         )}
       </div>
     </div>

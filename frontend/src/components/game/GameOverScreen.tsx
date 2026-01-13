@@ -7,6 +7,8 @@
  * - Game stats
  * - Play Again / Home buttons
  * - Share score functionality
+ * 
+ * Design: Dark theme with celebration animations
  */
 
 import { useEffect, useState } from 'react';
@@ -170,42 +172,47 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ambient glows */}
+      <div className="ambient-glow glow-yellow w-[500px] h-[500px] top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20" />
+      <div className="ambient-glow glow-green w-[400px] h-[400px] bottom-0 left-0 -translate-x-1/2 translate-y-1/2 opacity-10" />
+      <div className="ambient-glow glow-blue w-[400px] h-[400px] bottom-0 right-0 translate-x-1/2 translate-y-1/2 opacity-10" />
+      
       {/* Confetti */}
       {showConfetti && <Confetti />}
       
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-md animate-scale-in">
         {/* Game Over Title */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-2">
             🎉 GAME OVER 🎉
           </h1>
         </div>
 
         {/* Winner Section */}
         {winner && (
-          <div className="bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border-2 border-yellow-400 rounded-2xl p-6 mb-4 text-center relative overflow-hidden">
+          <div className="bg-surface-warning border border-simon-yellow/40 rounded-2xl p-6 mb-4 text-center relative overflow-hidden">
             {/* Glow effect */}
-            <div className="absolute inset-0 bg-yellow-400/10 animate-pulse" />
+            <div className="absolute inset-0 bg-simon-yellow/5 animate-pulse" />
             
             <div className="relative z-10">
               {/* Crown animation */}
               <div className="text-5xl mb-2 animate-bounce">👑</div>
               
-              <h2 className="text-2xl font-bold text-yellow-400 mb-2">
+              <h2 className="text-2xl font-bold text-simon-yellow mb-2">
                 {isSoloGame ? 'GREAT JOB!' : 'WINNER!'}
               </h2>
               
-              <div className="text-white text-xl font-semibold mb-1">
+              <div className="text-text-primary text-xl font-semibold mb-1">
                 {winner.name}
               </div>
               
-              <div className="text-4xl font-bold text-yellow-300">
-                {animatedScore} <span className="text-lg">points</span>
+              <div className="text-4xl font-bold text-simon-yellow">
+                {animatedScore} <span className="text-lg text-text-secondary">points</span>
               </div>
               
               {isWinner && !isSoloGame && (
-                <div className="mt-2 text-green-400 text-sm font-semibold">
+                <div className="mt-3 text-simon-green text-sm font-semibold">
                   ✨ That's YOU! ✨
                 </div>
               )}
@@ -215,8 +222,8 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 
         {/* Scoreboard (Multiplayer only) */}
         {!isSoloGame && finalScores.length > 0 && (
-          <div className="bg-gray-800/80 rounded-2xl p-4 mb-4">
-            <h3 className="text-white font-bold text-center mb-3 text-sm uppercase tracking-wide">
+          <div className="glass-card p-4 mb-4">
+            <h3 className="text-text-secondary font-medium text-center mb-3 text-xs uppercase tracking-wider">
               Final Standings
             </h3>
             
@@ -228,29 +235,32 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
                 return (
                   <div
                     key={player.playerId}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
-                      isCurrentPlayer
-                        ? 'bg-blue-600 scale-105'
-                        : rank <= 3
-                          ? 'bg-gray-700'
-                          : 'bg-gray-700/50'
-                    }`}
+                    className={`
+                      flex items-center justify-between px-3 py-2.5 rounded-xl
+                      transition-all duration-fast
+                      ${isCurrentPlayer
+                        ? 'bg-surface-info border border-simon-blue/30 scale-[1.02]'
+                        : 'bg-bg-elevated border border-border-subtle'
+                      }
+                    `}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xl w-8 text-center">
                         {getMedal(rank)}
                       </span>
-                      <span className="text-white font-medium">
+                      <span className="text-text-primary font-medium">
                         {player.name}
-                        {isCurrentPlayer && <span className="text-xs ml-1 text-blue-200">(you)</span>}
+                        {isCurrentPlayer && (
+                          <span className="text-xs ml-1.5 text-simon-blue">(you)</span>
+                        )}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-bold">
-                        {player.score} pts
+                      <span className="text-text-primary font-bold">
+                        {player.score} <span className="text-text-muted font-normal">pts</span>
                       </span>
                       {player.isEliminated && (
-                        <span className="text-red-400 text-xs">💀</span>
+                        <span className="text-simon-red text-xs">💀</span>
                       )}
                     </div>
                   </div>
@@ -261,27 +271,27 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
         )}
 
         {/* Game Stats */}
-        <div className="bg-gray-800/60 rounded-xl p-4 mb-6">
+        <div className="glass-card p-4 mb-6">
           <div className="flex justify-around text-center">
             <div>
-              <div className="text-2xl font-bold text-white">{roundsPlayed}</div>
-              <div className="text-gray-400 text-xs">Rounds</div>
+              <div className="text-2xl font-bold text-text-primary">{roundsPlayed}</div>
+              <div className="text-text-muted text-xs uppercase tracking-wide">Rounds</div>
             </div>
-            <div className="border-l border-gray-600" />
+            <div className="w-px bg-border-default" />
             <div>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-text-primary">
                 {finalScores.find(s => s.playerId === currentPlayerId)?.score || 0}
               </div>
-              <div className="text-gray-400 text-xs">Your Score</div>
+              <div className="text-text-muted text-xs uppercase tracking-wide">Your Score</div>
             </div>
             {!isSoloGame && (
               <>
-                <div className="border-l border-gray-600" />
+                <div className="w-px bg-border-default" />
                 <div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold text-text-primary">
                     #{finalScores.findIndex(s => s.playerId === currentPlayerId) + 1}
                   </div>
-                  <div className="text-gray-400 text-xs">Your Rank</div>
+                  <div className="text-text-muted text-xs uppercase tracking-wide">Your Rank</div>
                 </div>
               </>
             )}
@@ -293,8 +303,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           {/* Play Again Button */}
           <button
             onClick={onPlayAgain}
-            className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-100 active:scale-95 text-lg flex items-center justify-center gap-2 shadow-lg"
-            style={{ touchAction: 'manipulation' }}
+            className="btn btn-primary w-full text-lg"
           >
             🔄 PLAY AGAIN
           </button>
@@ -302,8 +311,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           {/* Home Button */}
           <button
             onClick={onGoHome}
-            className="w-full bg-gray-700 hover:bg-gray-600 active:bg-gray-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-100 active:scale-95 text-lg flex items-center justify-center gap-2"
-            style={{ touchAction: 'manipulation' }}
+            className="btn btn-ghost w-full text-lg bg-bg-elevated border border-border-subtle"
           >
             🏠 HOME
           </button>
@@ -311,8 +319,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           {/* Share Button */}
           <button
             onClick={handleShare}
-            className="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-100 active:scale-95 flex items-center justify-center gap-2"
-            style={{ touchAction: 'manipulation' }}
+            className="btn btn-secondary w-full"
           >
             📤 SHARE SCORE
           </button>

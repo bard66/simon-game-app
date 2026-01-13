@@ -2,6 +2,7 @@
  * Toast Notification Component
  * 
  * Shows temporary success/error messages
+ * Design: Dark theme with Simon color accents
  */
 
 import { useEffect } from 'react';
@@ -22,10 +23,22 @@ export function Toast({ message, type = 'success', duration = 3000, onClose }: T
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const bgColors = {
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
+  const styles = {
+    success: {
+      bg: 'bg-surface-success',
+      border: 'border-simon-green/40',
+      text: 'text-simon-green',
+    },
+    error: {
+      bg: 'bg-surface-error',
+      border: 'border-simon-red/40',
+      text: 'text-simon-red',
+    },
+    info: {
+      bg: 'bg-surface-info',
+      border: 'border-simon-blue/40',
+      text: 'text-simon-blue',
+    },
   };
 
   const icons = {
@@ -34,15 +47,28 @@ export function Toast({ message, type = 'success', duration = 3000, onClose }: T
     info: 'ℹ️',
   };
 
+  const style = styles[type];
+
   return (
     <div className="fixed top-2 right-2 sm:top-4 sm:right-4 z-50 animate-slide-in max-w-[calc(100vw-1rem)] sm:max-w-md">
-      <div className={`${bgColors[type]} text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-lg flex items-center gap-2 sm:gap-3 min-w-[280px] sm:min-w-[300px]`}>
+      <div 
+        className={`
+          ${style.bg} ${style.border} border
+          backdrop-blur-xl
+          px-4 sm:px-5 py-3 sm:py-4 rounded-xl 
+          shadow-elevated
+          flex items-center gap-3 
+          min-w-[280px] sm:min-w-[300px]
+        `}
+      >
         <span className="text-xl sm:text-2xl">{icons[type]}</span>
-        <span className="font-medium text-sm sm:text-base flex-1">{message}</span>
+        <span className={`font-medium text-sm sm:text-base flex-1 ${style.text}`}>
+          {message}
+        </span>
         <button
           onClick={onClose}
-          className="text-white/80 hover:text-white active:text-white transition-colors text-lg"
-          aria-label="Close"
+          className="text-text-muted hover:text-text-primary transition-colors duration-fast text-lg p-1"
+          aria-label="Close notification"
         >
           ✕
         </button>

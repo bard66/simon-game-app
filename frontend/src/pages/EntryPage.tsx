@@ -3,12 +3,17 @@
  * 
  * Name + avatar selection page.
  * First screen players see.
+ * 
+ * Design: Dark theme with Simon color ambient glows
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createSession, joinGame } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
+
+// Avatar options with emojis
+const AVATARS = ['😀', '🎮', '🚀', '⚡', '🎨', '🎯', '🏆', '🌟'];
 
 export function EntryPage() {
   const [searchParams] = useSearchParams();
@@ -50,7 +55,7 @@ export function EntryPage() {
   const handleJoinGame = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(false);
+    setLoading(true);
 
     try {
       const response = await joinGame(displayName, avatarId, gameCode);
@@ -63,126 +68,179 @@ export function EntryPage() {
     }
   };
 
+  // Mode Selection Screen
   if (!mode) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-3 sm:p-4">
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
-          <h1 className="text-3xl sm:text-4xl font-bold text-center mb-2">🎮 Bar Says</h1>
-          <p className="text-gray-600 text-center mb-6 sm:mb-8 text-sm sm:text-base">Online Rally Edition</p>
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Ambient glow effects */}
+        <div className="ambient-glow glow-green w-[400px] h-[400px] -top-48 -left-48 animate-glow-pulse" />
+        <div className="ambient-glow glow-blue w-[400px] h-[400px] -bottom-48 -right-48 animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="ambient-glow glow-red w-[300px] h-[300px] top-1/4 -right-32 animate-glow-pulse" style={{ animationDelay: '0.75s' }} />
+        <div className="ambient-glow glow-yellow w-[300px] h-[300px] bottom-1/4 -left-32 animate-glow-pulse" style={{ animationDelay: '2.25s' }} />
+        
+        <div className="relative z-10 w-full max-w-md animate-scale-in">
+          {/* Logo & Title */}
+          <div className="text-center mb-10">
+            <h1 className="text-5xl sm:text-6xl font-bold text-text-primary tracking-tight mb-3">
+              BAR SAYS
+            </h1>
+            <p className="text-text-secondary text-lg">
+              Online Rally Edition
+            </p>
+          </div>
           
-          <div className="space-y-3 sm:space-y-4">
+          {/* Action Buttons */}
+          <div className="space-y-4">
             <button
               onClick={() => setMode('create')}
-              className="w-full bg-purple-600 hover:bg-purple-700 active:bg-purple-800 active:scale-98 text-white font-bold py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl transition-all duration-75 text-base sm:text-lg min-h-[56px]"
-              style={{ touchAction: 'manipulation' }}
+              className="btn btn-primary w-full text-lg"
             >
-              Create Game
+              <span>🎮</span> Create Game
             </button>
             
             <button
               onClick={() => setMode('join')}
-              className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 active:scale-98 text-white font-bold py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl transition-all duration-75 text-base sm:text-lg min-h-[56px]"
-              style={{ touchAction: 'manipulation' }}
+              className="btn btn-secondary w-full text-lg"
             >
-              Join Game
+              <span>🔗</span> Join Game
             </button>
           </div>
+          
+          {/* Footer hint */}
+          <p className="text-center text-text-muted text-sm mt-8">
+            Create a room and invite friends to play
+          </p>
         </div>
       </div>
     );
   }
 
+  // Form Screen (Create/Join)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ambient glow effects */}
+      <div className="ambient-glow glow-green w-[400px] h-[400px] -top-48 -left-48 animate-glow-pulse" />
+      <div className="ambient-glow glow-blue w-[400px] h-[400px] -bottom-48 -right-48 animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
+      
+      <div className="relative z-10 w-full max-w-md animate-fade-slide-up">
+        {/* Back Button */}
         <button
           onClick={() => setMode(null)}
-          className="text-gray-600 hover:text-gray-800 active:text-gray-900 mb-4 text-sm sm:text-base"
+          className="btn btn-ghost mb-6 -ml-2 px-3 min-h-0 h-10"
         >
-          ← Back
+          <span>←</span> Back
         </button>
         
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-          {mode === 'create' ? 'Create Game' : 'Join Game'}
-        </h2>
-        
-        <form onSubmit={mode === 'create' ? handleCreateGame : handleJoinGame} className="space-y-3 sm:space-y-4">
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-              Display Name
-            </label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Enter your name"
-              minLength={3}
-              maxLength={12}
-              required
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-sm sm:text-base"
-            />
-          </div>
+        {/* Card */}
+        <div className="glass-card p-6 sm:p-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6">
+            {mode === 'create' ? '🎮 Create Game' : '🔗 Join Game'}
+          </h2>
           
-          {mode === 'join' && (
+          <form onSubmit={mode === 'create' ? handleCreateGame : handleJoinGame} className="space-y-5">
+            {/* Display Name Input */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                Game Code
-                {searchParams.get('join') && (
-                  <span className="ml-2 text-xs text-green-600 font-normal">
-                    ✅ Pre-filled from invite link
-                  </span>
-                )}
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                Display Name
               </label>
               <input
                 type="text"
-                value={gameCode}
-                onChange={(e) => setGameCode(e.target.value.toUpperCase())}
-                placeholder="ABCDEF"
-                maxLength={6}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Enter your name"
+                minLength={3}
+                maxLength={12}
                 required
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent uppercase text-sm sm:text-base"
+                className="w-full px-4 py-3 bg-bg-elevated border border-border-default rounded-xl 
+                         text-text-primary placeholder:text-text-muted
+                         focus:outline-none focus:border-simon-blue focus:ring-1 focus:ring-simon-blue
+                         transition-all duration-fast"
               />
             </div>
-          )}
-          
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-              Avatar
-            </label>
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-              {['1', '2', '3', '4', '5', '6', '7', '8'].map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setAvatarId(id)}
-                  className={`p-2.5 sm:p-4 rounded-lg border-2 transition-all duration-75 active:scale-95 min-h-[56px] min-w-[56px] ${
-                    avatarId === id
-                      ? 'border-purple-600 bg-purple-50'
-                      : 'border-gray-200 hover:border-gray-300 active:border-gray-400'
-                  }`}
-                  style={{ touchAction: 'manipulation' }}
-                >
-                  <span className="text-2xl sm:text-3xl">{['😀', '🎮', '🚀', '⚡', '🎨', '🎯', '🏆', '🌟'][parseInt(id) - 1]}</span>
-                </button>
-              ))}
+            
+            {/* Game Code Input (Join only) */}
+            {mode === 'join' && (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Game Code
+                  {searchParams.get('join') && (
+                    <span className="ml-2 text-xs text-simon-green font-normal">
+                      ✅ Pre-filled from invite
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="text"
+                  value={gameCode}
+                  onChange={(e) => setGameCode(e.target.value.toUpperCase())}
+                  placeholder="ABCDEF"
+                  maxLength={6}
+                  required
+                  className="w-full px-4 py-3 bg-bg-elevated border border-border-default rounded-xl 
+                           text-text-primary placeholder:text-text-muted font-mono text-xl tracking-[0.2em] text-center uppercase
+                           focus:outline-none focus:border-simon-blue focus:ring-1 focus:ring-simon-blue
+                           transition-all duration-fast"
+                />
+              </div>
+            )}
+            
+            {/* Avatar Selection */}
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-3">
+                Choose Avatar
+              </label>
+              <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 snap-x scrollbar-hide">
+                {AVATARS.map((emoji, index) => {
+                  const id = String(index + 1);
+                  const isSelected = avatarId === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setAvatarId(id)}
+                      className={`
+                        flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl
+                        flex items-center justify-center text-2xl sm:text-3xl
+                        transition-all duration-fast snap-center
+                        ${isSelected
+                          ? 'bg-surface-success ring-2 ring-simon-green scale-110 shadow-glow-green'
+                          : 'bg-bg-elevated hover:bg-bg-hover border border-border-subtle'
+                        }
+                      `}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {emoji}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-          
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
-              {error}
-            </div>
-          )}
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 active:bg-purple-800 active:scale-98 disabled:bg-gray-400 text-white font-bold py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl transition-all duration-75 text-base sm:text-lg min-h-[56px]"
-            style={{ touchAction: 'manipulation' }}
-          >
-            {loading ? 'Loading...' : mode === 'create' ? 'Create Game' : 'Join Game'}
-          </button>
-        </form>
+            
+            {/* Error Message */}
+            {error && (
+              <div className="bg-surface-error border border-simon-red/30 text-simon-red px-4 py-3 rounded-xl text-sm animate-fade-in">
+                {error}
+              </div>
+            )}
+            
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-full text-lg mt-2"
+            >
+              {loading ? (
+                <>
+                  <span className="animate-spin">⏳</span> Loading...
+                </>
+              ) : (
+                <>
+                  {mode === 'create' ? '🚀 Create Game' : '🎯 Join Game'}
+                </>
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

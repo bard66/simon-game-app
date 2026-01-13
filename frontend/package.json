@@ -23,7 +23,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -33,6 +33,17 @@
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^6.3.5"
+  },
+  "overrides": {
+    "webidl-conversions": "7.0.0",
+    "vite": "6.3.5",
+    "rollup": "4.40.0",
+    "cssstyle": "4.2.1",
+    "iconv-lite": "0.6.3",
+    "caniuse-lite": "1.0.30001700",
+    "@exodus/bytes": "1.7.0",
+    "@csstools/css-syntax-patches-for-csstree": "1.0.0",
+    "@rollup/rollup-darwin-arm64": "4.40.0"
   }
 }
